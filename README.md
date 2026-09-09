@@ -4,39 +4,7 @@ NexMesh is a decentralized federated-learning network where multiple independent
 
 ## Architecture
 
-```text
-                    NexMesh Coordinator
-                           │
-                 ┌─────────┴─────────┐
-                 │                   │
-            Node Registry       FL Job Manager
-                 │                   │
-          ┌──────┼──────┬────────────┘
-          │      │      │
-          ▼      ▼      ▼
-       Node 1  Node 2  Node 3  ... Node N
-          │      │      │
-       Data 1  Data 2  Data 3  ... Data N
-          │      │      │
-          └──────┼──────┘
-                 │
-           Local Training
-              (PyTorch)
-                 │
-           Model Updates
-          (No raw data)
-                 │
-                 ▼
-        Federated Aggregation
-              (FedAvg)
-                 │
-                 ▼
-            Global Model
-                 │
-          ┌──────┼──────┬──────┐
-          ▼      ▼      ▼      ▼
-       Node 1  Node 2  Node 3  ...
-```
+![`diagram.png`](/diagram.png)
 
 ## How It Works
 
