@@ -1,0 +1,48 @@
+# Python environments and generated files
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+*.csr
+
+# Kind and local runtime state
+.kind_tmp/
+*.pid
+*.pid.fl
+*.fl
+
+# NVFlare generated kits, identities, logs, jobs, and certificates
+workspace/fedlearn/prod_00/
+workspace/fedlearn/state/
+workspace/fedlearn/**/local/
+workspace/fedlearn/**/startup/
+workspace/fedlearn/**/transfer/
+workspace/fedlearn/**/*.log
+workspace/fedlearn/**/*.jsonl
+
+# Private/raw datasets and generated model artifacts
+workspace/fedlearn/mnist_raw/
+workspace/fedlearn/datasets/
+workspace/fedlearn/server_test/
+workspace/fedlearn/results/
+jobs/**/app/custom/raw_data/
+**/*.pt
+**/*.pth
+**/*.ckpt
+
+# Local experiment outputs
+results/
+logs/
+*.out
+*.err

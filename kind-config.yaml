@@ -1,0 +1,75 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: fedlearn-cluster
+
+containerdConfigPatches:
+  - |-
+    [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.nvidia]
+      runtime_type = "io.containerd.runc.v2"
+      [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.nvidia.options]
+        BinaryName = "/usr/bin/nvidia-container-runtime"
+
+nodes:
+  - role: control-plane
+    extraMounts:
+      - hostPath: /dev
+        containerPath: /dev
+      - hostPath: /usr/bin/nvidia-container-runtime
+        containerPath: /usr/bin/nvidia-container-runtime
+        readOnly: true
+      - hostPath: /usr/bin/nvidia-container-cli
+        containerPath: /usr/bin/nvidia-container-cli
+        readOnly: true
+      - hostPath: /usr/bin/nvidia-ctk
+        containerPath: /usr/bin/nvidia-ctk
+        readOnly: true
+      - hostPath: /usr/lib/x86_64-linux-gnu/libnvidia-ml.so
+        containerPath: /usr/lib/x86_64-linux-gnu/libnvidia-ml.so
+        readOnly: true
+      - hostPath: /usr/lib/x86_64-linux-gnu/libnvidia-ml.so.1
+        containerPath: /usr/lib/x86_64-linux-gnu/libnvidia-ml.so.1
+        readOnly: true
+      - hostPath: /usr/lib/x86_64-linux-gnu/libnvidia-ml.so.595.91.07
+        containerPath: /usr/lib/x86_64-linux-gnu/libnvidia-ml.so.595.91.07
+        readOnly: true
+      - hostPath: /usr/lib/x86_64-linux-gnu/libcuda.so
+        containerPath: /usr/lib/x86_64-linux-gnu/libcuda.so
+        readOnly: true
+      - hostPath: /usr/lib/x86_64-linux-gnu/libcuda.so.1
+        containerPath: /usr/lib/x86_64-linux-gnu/libcuda.so.1
+        readOnly: true
+      - hostPath: /usr/lib/x86_64-linux-gnu/libcuda.so.595.91.07
+        containerPath: /usr/lib/x86_64-linux-gnu/libcuda.so.595.91.07
+        readOnly: true
+      - hostPath: /usr/lib/x86_64-linux-gnu/libnvidia-container.so.1
+        containerPath: /usr/lib/x86_64-linux-gnu/libnvidia-container.so.1
+        readOnly: true
+      - hostPath: /usr/lib/x86_64-linux-gnu/libnvidia-container-go.so.1
+        containerPath: /usr/lib/x86_64-linux-gnu/libnvidia-container-go.so.1
+        readOnly: true
+      - hostPath: /usr/lib/x86_64-linux-gnu/libnvidia-container-go.so.1.20.0
+        containerPath: /usr/lib/x86_64-linux-gnu/libnvidia-container-go.so.1.20.0
+        readOnly: true
+      - hostPath: /usr/lib/x86_64-linux-gnu
+        containerPath: /driver-root/usr/lib/x86_64-linux-gnu
+        readOnly: true
+      - hostPath: ${FEDLEARN_ROOT}/workspace/fedlearn/datasets/client_1
+        containerPath: /datasets/client_1
+      - hostPath: ${FEDLEARN_ROOT}/workspace/fedlearn/datasets/client_2
+        containerPath: /datasets/client_2
+      - hostPath: ${FEDLEARN_ROOT}/workspace/fedlearn/datasets/client_3
+        containerPath: /datasets/client_3
+      - hostPath: ${FEDLEARN_ROOT}/workspace/fedlearn/server_test
+        containerPath: /datasets/server_test
+      - hostPath: ${FEDLEARN_ROOT}/workspace/fedlearn/prod_00/server1
+        containerPath: /nvflare-kits/server1
+      - hostPath: ${FEDLEARN_ROOT}/workspace/fedlearn/prod_00/site-1
+        containerPath: /nvflare-kits/site-1
+      - hostPath: ${FEDLEARN_ROOT}/workspace/fedlearn/prod_00/site-2
+        containerPath: /nvflare-kits/site-2
+      - hostPath: ${FEDLEARN_ROOT}/workspace/fedlearn/prod_00/site-3
+        containerPath: /nvflare-kits/site-3
+      - hostPath: ${FEDLEARN_ROOT}/workspace/fedlearn/prod_00/admin@nvidia.com
+        containerPath: /nvflare-kits/admin
+      - hostPath: ${FEDLEARN_ROOT}/workspace/fedlearn/results
+        containerPath: /nvflare-results
