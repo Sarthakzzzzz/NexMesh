@@ -1,7 +1,12 @@
 FROM python:3.13-slim
 
-RUN pip install \
-    nvflare \
+ENV PIP_DEFAULT_TIMEOUT=180 \
+    PIP_RETRIES=10
+
+RUN python -m pip install --no-cache-dir \
+    --timeout 180 \
+    --retries 10 \
+    nvflare==2.9.0 \
     torch \
     torchvision \
     numpy \
@@ -9,4 +14,4 @@ RUN pip install \
 
 WORKDIR /workspace
 
-COPY jobs/fedavg_nn/app/custom/train.py /workspace/train.py
+COPY jobs/fedavg_nn/train.py /workspace/train.py

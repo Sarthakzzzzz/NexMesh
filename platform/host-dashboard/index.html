@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NexMesh — Host Dashboard</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f3f4f6; color: #111827; line-height: 1.5; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+  header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #e5e7eb; }
+  .logo { width: 32px; height: 32px; background: #2563eb; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18px; }
+  h1 { font-size: 24px; font-weight: 600; }
+  .subtitle { color: #6b7280; font-size: 14px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-bottom: 24px; }
+  .card { background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+  .card h2 { font-size: 16px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .card h2 .icon { width: 20px; height: 20px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; padding: 8px 0; color: #6b7280; font-weight: 600; border-bottom: 1px solid #e5e7eb; }
+  td { padding: 10px 0; border-bottom: 1px solid #f3f4f6; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
+  .badge-PENDING { background: #fef3c7; color: #92400e; }
+  .badge-APPROVED { background: #dbeafe; color: #1e40af; }
+  .badge-PROVISIONING { background: #e0e7ff; color: #3730a3; }
+  .badge-AWAITING_CLIENT_PACKAGE { background: #e0e7ff; color: #4338ca; }
+  .badge-READY { background: #d1fae5; color: #065f46; }
+  .badge-ONLINE { background: #dcfce7; color: #166534; }
+  .badge-OFFLINE { background: #f3f4f6; color: #4b5563; }
+  .badge-DISABLED { background: #fee2e2; color: #991b1b; }
+  .badge-REJECTED { background: #fee2e2; color: #991b1b; }
+  .badge-REMOVING { background: #f3f4f6; color: #4b5563; }
+  .badge-REMOVED { background: #f3f4f6; color: #9ca3af; }
+  .badge-SUBMITTED { background: #fef3c7; color: #92400e; }
+  .badge-COMPLETED { background: #dcfce7; color: #166534; }
+  .badge-FAILED { background: #fee2e2; color: #991b1b; }
+  .btn { padding: 8px 16px; border: 1px solid #d1d5db; border-radius: 6px; background: white; color: #374151; font-size: 13px; cursor: pointer; transition: all 0.2s; }
+  .btn:hover { border-color: #2563eb; color: #2563eb; }
+  .btn-primary { background: #2563eb; color: white; border-color: #2563eb; }
+  .btn-primary:hover { background: #1d4ed8; }
+  .btn-danger { background: #fee2e2; color: #991b1b; border-color: #fecaca; }
+  .btn-danger:hover { background: #fecaca; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .input-group { margin-bottom: 12px; }
+  .input-group label { display: block; font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 4px; }
+  .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; }
+  .input-group textarea { resize: vertical; min-height: 60px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .token-input { display: flex; gap: 8px; margin-bottom: 16px; }
+  .token-input input { flex: 1; }
+  .alert { padding: 12px 16px; border-radius: 6px; margin-bottom: 16px; font-size: 13px; }
+  .alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+  .alert-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+  .hidden { display: none; }
+  .code { font-family: ui-monospace, SFMono-Regular, monospace; font-size: 11px; background: #f3f4f6; padding: 2px 6px; border-radius: 4px; }
+  .small { font-size: 12px; color: #6b7280; }
+  .flex { display: flex; gap: 8px; align-items: center; }
+  .flex-1 { flex: 1; }
+  .mono { font-family: ui-monospace, SFMono-Regular, monospace; font-size: 12px; }
+  .results-pre { background: #f3f4f6; padding: 12px; border-radius: 6px; font-size: 11px; overflow-x: auto; max-height: 300px; overflow-y: auto; }
+  .spinner { width: 16px; height: 16px; border: 2px solid #e5e7eb; border-top-color: #2563eb; border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .section { margin-bottom: 32px; }
+  .section-title { font-size: 18px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.9); display: none; align-items: center; justify-content: center; z-index: 50; }
+  .loading-overlay.visible { display: flex; }
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loader"><div class="spinner" style="width:32px;height:32px;"></div></div>
+
+<div class="container">
+  <header>
+    <div class="logo">NX</div>
+    <div>
+      <h1>NexMesh Host Dashboard</h1>
+      <p class="subtitle">Federated learning coordination — manage clients, jobs, and results</p>
+    </div>
+  </header>
+
+  <!-- Host token -->
+  <div class="card">
+    <h2><span class="icon">🔑</span> Host Authentication</h2>
+    <div class="input-group">
+      <label>Host Bearer Token</label>
+      <input type="password" id="hostToken" placeholder="NEXMESH_HOST_TOKEN" value="">
+    </div>
+    <p class="small">Set NEXMESH_HOST_TOKEN environment variable and paste it here to authorize host operations.</p>
+  </div>
+
+  <!-- Clients section -->
+  <div class="section">
+    <div class="section-title"><span class="icon">👥</span> Clients</div>
+    <div class="card">
+      <div class="flex flex-1" style="justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="text" id="newClientId" placeholder="client id (e.g. site-1)" class="flex-1">
+          <input type="text" id="newClientName" placeholder="display name" class="flex-1">
+          <select id="newClientMode" class="flex-1">
+            <option value="managed_kubernetes">Managed Kubernetes</option>
+            <option value="remote_participant">Remote Participant</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" onclick="createClient()">Create Client</button>
+      </div>
+      <table id="clientsTable">
+        <thead>
+          <tr>
+            <th>ID</th><th>Display Name</th><th>Mode</th><th>Status</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Jobs section -->
+  <div class="section">
+    <div class="section-title"><span class="icon">📋</span> Jobs</div>
+    <div class="card">
+      <div class="form-row">
+        <input type="text" id="jobName" placeholder="Job name (e.g. fedavg_mnist)">
+        <input type="text" id="jobParticipants" placeholder="Participants (comma-separated, e.g. site-1,site-2,site-3)">
+      </div>
+      <div class="input-group">
+        <label>Requirements / Description</label>
+        <textarea id="jobRequirements" placeholder="Federated averaging MNIST training job..."></textarea>
+      </div>
+      <div class="form-row">
+        <input type="number" id="jobRounds" placeholder="Num rounds" value="5" min="1">
+        <input type="number" id="jobEpochs" placeholder="Local epochs" value="1" min="1">
+        <input type="number" id="jobBatch" placeholder="Batch size" value="64" min="1">
+        <input type="number" id="jobMinClients" placeholder="Min clients (optional)" min="1">
+      </div>
+      <div class="input-group" style="margin-bottom: 16px;">
+        <label>Data paths (JSON, optional)</label>
+        <textarea id="jobDataPaths" placeholder='{"site-1":"/data/site-1/mnist.pt","site-2":"/data/site-2/mnist.pt"}'></textarea>
+      </div>
+      <button class="btn btn-primary" onclick="submitNVFlareJob()">Submit NVFlare Job</button>
+      <table id="jobsTable">
+        <thead>
+          <tr>
+            <th>ID</th><th>Name</th><th>NVFlare Job ID</th><th>Status</th><th>NVFlare Status</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="alert" class="alert hidden"></div>
+</div>
+
+<script>
+const API_BASE = 'http://127.0.0.1:8000';
+let hostToken = '';
+
+function showAlert(msg, type = 'error') {
+  const el = document.getElementById('alert');
+  el.textContent = msg;
+  el.className = `alert alert-${type}`;
+  el.classList.remove('hidden');
+  setTimeout(() => el.classList.add('hidden'), 5000);
+}
+
+function hideAlert() {
+  document.getElementById('alert').classList.add('hidden');
+}
+
+function setLoading(loading) {
+  document.getElementById('loader').classList.toggle('visible', loading);
+}
+
+function getAuthHeaders() {
+  const h = { 'Content-Type': 'application/json' };
+  if (hostToken) h['Authorization'] = `Bearer ${hostToken}`;
+  return h;
+}
+
+async function api(path, options = {}) {
+  const r = await fetch(`${API_BASE}${path}`, { ...options, headers: getAuthHeaders() });
+  if (!r.ok) {
+    const detail = (await r.json().catch(() => ({}))).detail || `Request failed (${r.status})`;
+    throw new Error(detail);
+  }
+  return r.json();
+}
+
+// ---- Clients ----
+
+async function loadClients() {
+  try {
+    const clients = await api('/clients');
+    const tbody = document.querySelector('#clientsTable tbody');
+    tbody.innerHTML = '';
+    for (const c of clients) {
+      const tr = document.createElement('tr');
+      const badgeClass = `badge-${c.status}`;
+      const canApprove = c.status === 'PENDING' || c.status === 'REJECTED' || c.status === 'FAILED';
+      const canReject = c.status === 'PENDING';
+      const canProvision = c.status === 'APPROVED' || c.status === 'OFFLINE' || c.status === 'FAILED';
+      const canDisable = c.status === 'APPROVED' || c.status === 'ONLINE' || c.status === 'OFFLINE' || c.status === 'READY';
+      tr.innerHTML = `
+        <td><code class="code">${c.id}</code></td>
+        <td>${c.display_name}</td>
+        <td>${c.mode}</td>
+        <td><span class="badge ${badgeClass}">${c.status}</span></td>
+        <td>
+          ${canApprove ? `<button class="btn btn-primary" onclick="approveClient('${c.id}')">Approve</button>` : ''}
+          ${canReject ? `<button class="btn btn-danger" onclick="rejectClient('${c.id}')">Reject</button>` : ''}
+          ${canProvision && !c.nvflare_identity ? `<button class="btn" onclick="provisionClient('${c.id}')">Provision</button>` : ''}
+          ${c.nvflare_identity ? `<button class="btn" onclick="downloadKit('${c.id}')">Kit</button>` : ''}
+          ${canDisable ? `<button class="btn" onclick="disableClient('${c.id}')">Disable</button>` : ''}
+          <button class="btn btn-danger" onclick="deleteClient('${c.id}')">Delete</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    }
+  } catch (e) {
+    showAlert('Failed to load clients: ' + e.message);
+  }
+}
+
+async function createClient() {
+  const id = document.getElementById('newClientId').value.trim();
+  const name = document.getElementById('newClientName').value.trim();
+  const mode = document.getElementById('newClientMode').value;
+  if (!id || !name) { showAlert('Client id and name are required'); return; }
+  try {
+    await api('/clients', { method: 'POST', body: JSON.stringify({ id, display_name: name, mode }) });
+    document.getElementById('newClientId').value = '';
+    document.getElementById('newClientName').value = '';
+    hideAlert();
+    loadClients();
+  } catch (e) { showAlert('Create failed: ' + e.message); }
+}
+
+async function approveClient(id) {
+  try {
+    await api(`/clients/${id}/approve`, { method: 'POST' });
+    loadClients();
+  } catch (e) { showAlert('Approve failed: ' + e.message); }
+}
+
+async function rejectClient(id) {
+  try {
+    await api(`/clients/${id}/reject`, { method: 'POST' });
+    loadClients();
+  } catch (e) { showAlert('Reject failed: ' + e.message); }
+}
+
+async function deleteClient(id) {
+  if (!confirm(`Are you sure you want to permanently delete client '${id}'? This will remove its kit and forget the client.`)) return;
+  try {
+    await api(`/clients/${id}`, { method: 'DELETE' });
+    loadClients();
+  } catch (e) { showAlert('Delete failed: ' + e.message); }
+}
+
+async function provisionClient(id) {
+  try {
+    await api(`/clients/${id}/provision`, { method: 'POST' });
+    loadClients();
+  } catch (e) { showAlert('Provision failed: ' + e.message); }
+}
+
+async function downloadKit(id) {
+  try {
+    const res = await fetch(`${API_BASE}/clients/${id}/kit`, {
+      headers: getAuthHeaders()
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || 'Download failed: ' + res.status);
+    }
+    const blob = await res.blob();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `${id}-kit.zip`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  } catch (e) { showAlert('Download failed: ' + e.message); }
+}
+
+async function disableClient(id) {
+  if (!confirm('Disable this client?')) return;
+  try {
+    await api(`/clients/${id}/disable`, { method: 'POST' });
+    loadClients();
+  } catch (e) { showAlert('Disable failed: ' + e.message); }
+}
+
+// ---- Jobs ----
+
+async function loadJobs() {
+  try {
+    const jobs = await api('/jobs');
+    const tbody = document.querySelector('#jobsTable tbody');
+    tbody.innerHTML = '';
+    for (const j of jobs) {
+      const tr = document.createElement('tr');
+      const nvBadge = j.nvflare_status ? `badge-${j.nvflare_status}` : 'badge-SUBMITTED';
+      const statusBadge = `badge-${j.status}`;
+      const canCollect = j.nvflare_status === 'COMPLETED' || (j.result && Object.keys(j.result).length > 0);
+      tr.innerHTML = `
+        <td><code class="code">${j.id}</code></td>
+        <td>${j.name}</td>
+        <td><code class="code">${j.nvflare_job_id || '—'}</code></td>
+        <td><span class="badge ${statusBadge}">${j.status}</span></td>
+        <td><span class="badge ${nvBadge}">${j.nvflare_status || '—'}</span></td>
+        <td>
+          <button class="btn" onclick="checkJobStatus('${j.id}')">Status</button>
+          ${canCollect ? `<button class="btn btn-primary" onclick="collectResults('${j.id}')">Collect</button>` : ''}
+          <button class="btn" onclick="viewJobDetail('${j.id}')">Detail</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    }
+  } catch (e) {
+    showAlert('Failed to load jobs: ' + e.message);
+  }
+}
+
+async function submitNVFlareJob() {
+  const name = document.getElementById('jobName').value.trim();
+  const participants = document.getElementById('jobParticipants').value.trim();
+  const requirements = document.getElementById('jobRequirements').value.trim();
+  const rounds = document.getElementById('jobRounds').value;
+  const epochs = document.getElementById('jobEpochs').value;
+  const batch = document.getElementById('jobBatch').value;
+  const minClients = document.getElementById('jobMinClients').value.trim();
+  const dataPaths = document.getElementById('jobDataPaths').value.trim();
+
+  if (!name || !participants || !requirements) { showAlert('Name, participants, and requirements are required'); return; }
+
+  const body = {
+    name,
+    participants: participants.split(',').map(s => s.trim()).filter(s => s),
+    requirements,
+    num_rounds: parseInt(rounds) || 5,
+    local_epochs: parseInt(epochs) || 1,
+    batch_size: parseInt(batch) || 64,
+  };
+  if (minClients) body.min_clients = parseInt(minClients);
+  if (dataPaths) {
+    try { body.data_paths = JSON.parse(dataPaths); } catch (e) { showAlert('Invalid JSON for data paths'); return; }
+  }
+
+  try {
+    setLoading(true);
+    const result = await api('/jobs/nvflare', { method: 'POST', body: JSON.stringify(body) });
+    hideAlert();
+    document.getElementById('jobName').value = '';
+    document.getElementById('jobParticipants').value = '';
+    document.getElementById('jobRequirements').value = '';
+    document.getElementById('jobDataPaths').value = '';
+    showAlert(`Job submitted: ${result.id} (NVFlare: ${result.nvflare_job_id})`, 'success');
+    loadJobs();
+  } catch (e) { showAlert('Submit failed: ' + e.message); }
+  finally { setLoading(false); }
+}
+
+async function checkJobStatus(id) {
+  try {
+    const status = await api(`/jobs/${id}/status`);
+    alert(`Job ${id}\nNVFlare Job ID: ${status.nvflare_job_id}\nStatus: ${status.nvflare_status}\nCompleted: ${status.completed}`);
+  } catch (e) { showAlert('Status check failed: ' + e.message); }
+}
+
+async function collectResults(id) {
+  try {
+    setLoading(true);
+    const result = await api(`/jobs/${id}/collect`, { method: 'POST' });
+    hideAlert();
+    showAlert(`Results collected for job ${id}`, 'success');
+    loadJobs();
+  } catch (e) { showAlert('Collect failed: ' + e.message); }
+  finally { setLoading(false); }
+}
+
+async function viewJobDetail(id) {
+  try {
+    const job = await api(`/jobs/${id}`);
+    const detail = JSON.stringify(job, null, 2);
+    const pre = document.createElement('div');
+    pre.className = 'card';
+    pre.style.padding = '16px';
+    pre.innerHTML = `<h2 style="margin-bottom:12px">Job ${id} Detail</h2><div class="results-pre">${detail.replace(/\n/g, '<br>').replace(/  /g, '&nbsp;&nbsp;')}</div><div style="margin-top:12px"><button class="btn" onclick="this.parentElement.parentElement.remove()">Close</button></div>`;
+    document.querySelector('.container').appendChild(pre);
+  } catch (e) { showAlert('Detail failed: ' + e.message); }
+}
+
+// ---- Health ----
+
+async function checkHealth() {
+  try {
+    await api('/health');
+    // silently pass
+  } catch (e) {
+    showAlert('Cannot reach coordinator at ' + API_BASE + '. Is it running?');
+  }
+}
+
+// ---- Init ----
+
+document.getElementById('hostToken').addEventListener('change', (e) => { hostToken = e.target.value.trim(); loadClients(); loadJobs(); });
+
+setInterval(() => { loadClients(); loadJobs(); }, 15000);
+
+checkHealth();
+loadClients();
+loadJobs();
+</script>
+
+</body>
+</html>

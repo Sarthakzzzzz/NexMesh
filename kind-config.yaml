@@ -11,6 +11,13 @@ containerdConfigPatches:
 
 nodes:
   - role: control-plane
+    extraPortMappings:
+      - containerPort: 30002
+        hostPort: 8002
+        protocol: TCP
+      - containerPort: 30003
+        hostPort: 8003
+        protocol: TCP
     extraMounts:
       - hostPath: /dev
         containerPath: /dev
@@ -29,17 +36,11 @@ nodes:
       - hostPath: /usr/lib/x86_64-linux-gnu/libnvidia-ml.so.1
         containerPath: /usr/lib/x86_64-linux-gnu/libnvidia-ml.so.1
         readOnly: true
-      - hostPath: /usr/lib/x86_64-linux-gnu/libnvidia-ml.so.595.91.07
-        containerPath: /usr/lib/x86_64-linux-gnu/libnvidia-ml.so.595.91.07
-        readOnly: true
       - hostPath: /usr/lib/x86_64-linux-gnu/libcuda.so
         containerPath: /usr/lib/x86_64-linux-gnu/libcuda.so
         readOnly: true
       - hostPath: /usr/lib/x86_64-linux-gnu/libcuda.so.1
         containerPath: /usr/lib/x86_64-linux-gnu/libcuda.so.1
-        readOnly: true
-      - hostPath: /usr/lib/x86_64-linux-gnu/libcuda.so.595.91.07
-        containerPath: /usr/lib/x86_64-linux-gnu/libcuda.so.595.91.07
         readOnly: true
       - hostPath: /usr/lib/x86_64-linux-gnu/libnvidia-container.so.1
         containerPath: /usr/lib/x86_64-linux-gnu/libnvidia-container.so.1
@@ -53,23 +54,13 @@ nodes:
       - hostPath: /usr/lib/x86_64-linux-gnu
         containerPath: /driver-root/usr/lib/x86_64-linux-gnu
         readOnly: true
-      - hostPath: ${FEDLEARN_ROOT}/workspace/fedlearn/datasets/client_1
-        containerPath: /datasets/client_1
-      - hostPath: ${FEDLEARN_ROOT}/workspace/fedlearn/datasets/client_2
-        containerPath: /datasets/client_2
-      - hostPath: ${FEDLEARN_ROOT}/workspace/fedlearn/datasets/client_3
-        containerPath: /datasets/client_3
+      - hostPath: ${FEDLEARN_ROOT}/workspace/fedlearn/datasets
+        containerPath: /datasets
       - hostPath: ${FEDLEARN_ROOT}/workspace/fedlearn/server_test
         containerPath: /datasets/server_test
-      - hostPath: ${FEDLEARN_ROOT}/workspace/fedlearn/prod_00/server1
-        containerPath: /nvflare-kits/server1
-      - hostPath: ${FEDLEARN_ROOT}/workspace/fedlearn/prod_00/site-1
-        containerPath: /nvflare-kits/site-1
-      - hostPath: ${FEDLEARN_ROOT}/workspace/fedlearn/prod_00/site-2
-        containerPath: /nvflare-kits/site-2
-      - hostPath: ${FEDLEARN_ROOT}/workspace/fedlearn/prod_00/site-3
-        containerPath: /nvflare-kits/site-3
+      - hostPath: ${FEDLEARN_ROOT}/workspace/fedlearn/prod_00/192.168.1.43
+        containerPath: /nvflare-kits/192.168.1.43
       - hostPath: ${FEDLEARN_ROOT}/workspace/fedlearn/prod_00/admin@nvidia.com
-        containerPath: /nvflare-kits/admin
+        containerPath: /nvflare-kits/admin@nvidia.com
       - hostPath: ${FEDLEARN_ROOT}/workspace/fedlearn/results
         containerPath: /nvflare-results

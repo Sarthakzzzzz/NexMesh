@@ -1,12 +1,16 @@
-# Python environments and generated files
+# Python environments and package manager caches
+.gitignore
 .venv/
-__pycache__/
+**/node_modules/
+**/dist/
+**/__pycache__/
 *.py[cod]
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
 .coverage
 htmlcov/
+
 # Local configuration and secrets
 .env
 .env.*
@@ -22,8 +26,27 @@ htmlcov/
 *.pid.fl
 *.fl
 
-# NVFlare generated kits, identities, logs, jobs, and certificates
-workspace/fedlearn/prod_00/
+# Database files
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+platform/nexmesh.db*
+
+# Archives and backup files
+*.zip
+*.tar.gz
+*.backup
+*.gpu-backup
+
+# Client kits and participant runtime folders
+client-kit/
+client-kit*/
+my-client-kit*/
+*-kit/
+*-kit*/
+workspace/fedlearn/prod_*/
+platform/backend/fedlearn/
 workspace/fedlearn/state/
 workspace/fedlearn/**/local/
 workspace/fedlearn/**/startup/
@@ -32,6 +55,9 @@ workspace/fedlearn/**/*.log
 workspace/fedlearn/**/*.jsonl
 
 # Private/raw datasets and generated model artifacts
+dataset/
+datasets/
+mnist_raw/
 workspace/fedlearn/mnist_raw/
 workspace/fedlearn/datasets/
 workspace/fedlearn/server_test/
@@ -41,8 +67,22 @@ jobs/**/app/custom/raw_data/
 **/*.pth
 **/*.ckpt
 
-# Local experiment outputs
+# Local experiment outputs & logs
 results/
 logs/
 *.out
 *.err
+*.log
+Amazon Q Logs.log
+
+# Scratch and notes files
+commit_msg.txt
+final plan.md
+further improvement
+improvements
+plan
+working.md
+prompt.md
+reprovision.sh
+Check_lines_99-101_in_resources_json_20261024.md
+GPU_resource_allocation_for_MNIST_20261024.md

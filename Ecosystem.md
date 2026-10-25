@@ -1,32 +1,57 @@
-# Ecosystem Overview
+# NexMesh Ecosystem Overview
 
-## Components
+## Core Components
 
-- **NVIDIA FLARE** coordinates jobs, rounds, client communication, and FedAvg.
-- **PyTorch** defines and trains the MNIST CNN.
-- **Docker** packages the Python and NVFlare runtime.
-- **Kubernetes** runs the server, admin, and three client pods.
-- **Kind** provides the local Kubernetes cluster.
-- **NVIDIA device plugin** exposes three time-sliced logical GPU slots.
-- **MNIST** supplies the client and server test data.
+- **NVIDIA FLARE 2.9**: Federated learning orchestration engine managing task scheduling, secure mutual TLS communication, aggregation, and workflow execution.
+- **PyTorch**: Deep learning framework used for CNN model architecture (`MNISTCNN`), dataset loading, and local model training.
+- **Kind (Kubernetes in Docker)**: Minimal development harness hosting the NVFlare Server and Admin pods.
+- **NexMesh Coordinator**: FastAPI backend managing dynamic client enrollment, PKI provisioning, job lifecycle, and result collection.
+- **Client Agent**: Standalone Python agent running directly on participant machines (Linux/macOS), abstracting NVFlare execution and providing live heartbeats.
+- **Web Dashboards**:
+  - **Host Dashboard** (React + Vite on port `5173`): Client approval, job monitoring, and metrics visualization.
+  - **Client Portal** (React + Vite on port `5174`): Participant self-registration, status polling, and one-click kit download.
 
-## Topology
+---
+
+## Network & Runtime Topology
 
 ```text
-server1
-  |
-  +-- site-1 -- client_1 data
-  +-- site-2 -- client_2 data
-  +-- site-3 -- client_3 data
+[ Remote Client 1 ] (RTX 5050 / Linux)
+      |
+      |-- (Mutual TLS :8002 & REST :8000)
+      v
++--------------------------------------------------------------+
+|                    NexMesh Host Node                         |
+|                                                              |
+|  FastAPI Backend (:8000)      Host Dashboard UI (:5173)      |
+|  Participant Portal (:5174)   SQLite DB (clients & jobs)     |
+|                                                              |
+|  +--------------------------------------------------------+  |
+|  |                 Kind Kubernetes Cluster                |  |
+|  |                                                        |  |
+|  |   [ Pod: nvflare-server ]       [ Pod: nvflare-admin ] |  |
+|  |   - WFCommServer (:8002)        - Flare Admin Session  |  |
+|  |   - InTimeAccumulateAggregator  - Job Submission CLI   |  |
+|  |   - ServerMNISTEvaluator                               |  |
+|  |   - Volume: /data/server_test                          |  |
+|  |   - Volume: /results (mapped to host)                  |  |
+|  +--------------------------------------------------------+  |
++--------------------------------------------------------------+
+      ^
+      |-- (Mutual TLS :8002 & REST :8000)
+      |
+[ Remote Client 2 ] (CPU / Linux / Remote)
 ```
 
-Each client trains locally. The server aggregates model updates. The server
-test split is evaluation-only and is not mounted into client pods.
+---
 
-## Repository Boundaries
+## Directory Roles & Boundaries
 
-- `jobs/` contains federated job and training code.
-- `k8s/` contains Kubernetes resources.
-- `kind-config.yaml` is a local-path template for Kind.
-- `workspace/fedlearn/split_mnist.py` creates local data artifacts.
-- `commands.md` contains operational commands.
+- `commands/`: Single-command operational shell scripts for developers and hosts.
+- `jobs/`: Self-contained NVFlare federated job definitions, configurations, and evaluator components.
+- `k8s/`: Kubernetes deployment manifests for server and admin pods.
+- `platform/backend/`: Coordinator database, REST APIs, and NVFlare certificate provisioning engine.
+- `platform/agent/`: Standalone participant runner, startup scripts, and dataset generators.
+- `platform/frontend/`: React Host Dashboard.
+- `platform/client-frontend/`: React Participant Portal.
+- `workspace/fedlearn/`: NVFlare root CA, base participant kits, test datasets, and output results.

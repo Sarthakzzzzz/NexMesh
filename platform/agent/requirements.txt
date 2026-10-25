@@ -1,0 +1,5 @@
+requests>=2.32
+torch>=2.0
+torchvision>=0.15
+nvflare>=2.9.0
+certifi
