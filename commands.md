@@ -31,7 +31,19 @@ To stop all background processes:
 
 ## 2. Remote Client Workflow
 
-### Registering and Starting a Client:
+### Web Portal Workflow (Recommended):
+
+1. **Open Portal**: Have your peer open `http://<HOST_IP_OR_TAILSCALE_IP>:5174` (or `:8000/portal`).
+2. **Enroll**: Submit display name and organization.
+3. **Approve**: On Host Dashboard (`:5173`), approve the client.
+4. **Download Kit**: The client clicks **Download Client Kit (.zip)**.
+5. **Run**:
+   - **Windows**: Double-click `start.bat` (or run in Command Prompt / PowerShell).
+   - **Linux / macOS**: Run `bash start.sh`.
+
+---
+
+### Command-Line Client Workflow:
 
 1. **Enroll Client**:
    ```bash
@@ -54,74 +66,55 @@ To stop all background processes:
    ```
 
 4. **Launch Agent**:
-   ```bash
-   cd ./my-client-kit
-   bash start.sh
-   ```
-   *(Or specify a custom dataset: `bash start.sh /path/to/my_mnist.pt`)*
+   - **Windows**:
+     ```cmd
+     cd my-client-kit
+     start.bat
+     ```
+   - **Linux / macOS**:
+     ```bash
+     cd ./my-client-kit
+     bash start.sh
+     ```
 
 ---
 
-## 3. Submitting Federated Jobs
+## 3. Launching Federated Training Jobs
 
-### Submit via REST API:
+### Trigger a Job:
 
 ```bash
 curl -X POST http://127.0.0.1:8000/jobs/nvflare \
   -H "Authorization: Bearer changeme" \
   -H "Content-Type: application/json" \
   -d '{
-    "participants": ["<CLIENT_ID>"],
-    "num_rounds": 2,
+    "participants": ["<CLIENT_1_ID>", "<CLIENT_2_ID>"],
+    "num_rounds": 5,
     "local_epochs": 1,
     "batch_size": 64
   }'
 ```
 
-### Check Job Status:
+### Check Job Status & Collect Results:
 
 ```bash
-curl -s -H "Authorization: Bearer changeme" \
-  http://127.0.0.1:8000/jobs/<JOB_ID>/status
-```
+# Check status
+curl -H "Authorization: Bearer changeme" http://127.0.0.1:8000/jobs/<JOB_ID>/status
 
-### Collect Job Results:
-
-```bash
-curl -s -X POST -H "Authorization: Bearer changeme" \
-  http://127.0.0.1:8000/jobs/<JOB_ID>/collect
+# Collect metrics and evaluate model
+curl -X POST -H "Authorization: Bearer changeme" http://127.0.0.1:8000/jobs/<JOB_ID>/collect
 ```
 
 ---
 
-## 4. Inspecting Output Models & Metrics
+## 4. Tailscale & Remote Network Setup
 
-The latest global model and evaluation metrics are saved at:
-
-```bash
-# View server evaluation metrics summary
-cat workspace/fedlearn/results/summary.json
-
-# View per-round evaluation lines
-cat workspace/fedlearn/results/server_test_metrics.jsonl
-
-# Inspect the PyTorch model weights
-python3 -c "
-import torch
-ckpt = torch.load('workspace/fedlearn/results/final_global_model.pt', map_location='cpu', weights_only=True)
-print('Checkpoint keys:', list(ckpt.keys()))
-for k, v in ckpt['model_state_dict'].items():
-    print(f'  {k:30s} shape: {list(v.shape)}')
-"
-```
-
----
-
-## 5. Automated Integration Test
-
-To verify the entire pipeline automatically:
-
-```bash
-./commands/6_test_workflow.sh
-```
-This runs the integration smoke test, validating client enrollment, host approval, kit packaging, and API connectivity.
+To allow participants outside your local Wi-Fi to connect:
+1. Ensure both your host machine and participant machines are connected to the same Tailscale network (Tailnet).
+2. Set your coordinator environment variables in `.env`:
+   ```bash
+   NEXMESH_SERVER_NAME="<HOST_TAILSCALE_IP>"
+   NEXMESH_COORDINATOR_URL="http://<HOST_TAILSCALE_IP>:8000"
+   ```
+3. Remote clients connect to `http://<HOST_TAILSCALE_IP>:5174` and download kits pre-configured with your Tailscale IP.
+4. No router port forwarding or public static IP is required.
